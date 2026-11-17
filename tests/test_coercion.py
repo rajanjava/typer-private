@@ -51,6 +51,36 @@ def test_coercion_path(tmp_path: Path) -> None:
     assert seen == [target]
 
 
+def test_coercion_path_allow_dash() -> None:
+    app = typer.Typer()
+    seen: list[Path] = []
+
+    @app.command()
+    def main(config: Path = typer.Option(..., exists=True, allow_dash=True)):
+        seen.append(config)
+
+    result = runner.invoke(app, ["--config", "-"])
+    assert result.exit_code == 0, result.output
+    assert seen == [Path("-")]
+
+
+def test_coercion_path_allow_dash_with_resolve_path() -> None:
+    app = typer.Typer()
+    seen: list[Path] = []
+
+    @app.command()
+    def main(
+        config: Path = typer.Option(
+            ..., exists=True, resolve_path=True, allow_dash=True
+        ),
+    ):
+        seen.append(config)
+
+    result = runner.invoke(app, ["--config", "-"])
+    assert result.exit_code == 0, result.output
+    assert seen == [Path("-")]
+
+
 def test_coercion_tuple_files(tmp_path: Path) -> None:
     first = tmp_path / "first.txt"
     second = tmp_path / "second.txt"
