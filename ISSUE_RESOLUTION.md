@@ -38,6 +38,11 @@ Because `is_dash` evaluated to `False`:
 
 ---
 
+## Solution Approach
+1. **Compare Click `Path` vs Typer `Path` Parameter Mapping:** Click's `click.Path` supports `allow_dash=True` so `"-"` represents stdin/stdout. However, when a Typer parameter was annotated as `pathlib.Path` with `allow_dash=True`, Typer's coercion/type layer rejected or mis-converted `"-"`.
+2. **Preserve `allow_dash` Handling Through Coercion:** Updated `typer/_param_types.py` so `Path("-")` is cleanly permitted and preserved when `allow_dash=True` is configured, while keeping validation strict when `allow_dash=False`.
+3. **TDD & Regression Safety:** Added `test_coercion_path_allow_dash` in `tests/test_coercion.py` testing `"-"` input with `allow_dash=True` and `allow_dash=False`.
+
 ## Solution
 Use `os.fspath(rv)` in the dash check:
 ```python
